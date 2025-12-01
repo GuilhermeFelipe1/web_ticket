@@ -1,0 +1,176 @@
+<div class="home">
+  <div class="caixa_1">
+    <div class="card" id="tv-panel">
+      <h2>Painel de Chamadas</h2>
+
+      <div id="panel-display">
+        <span class="current-ticket">
+          {{ sistema.atendimentoAtual?.numero || '----' }}
+        </span>
+
+        <div class="counter-info">
+          GUICHÊ <span>{{ sistema.atendimentoAtual ? '01' : '--' }}</span>
+        </div>
+
+        <div class="history">
+          <span 
+            *ngFor="let h of sistema.historicoChamadas"
+            class="history-item"
+          >
+            {{ h }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="caixa_2">
+    <div class="card" id="queue">
+      <h2>Área do Atendente (Guichê 01)</h2>
+
+      <div class="queue-info">
+  <strong>Fila Atual:</strong>
+      SP: {{ sistema.qSP }} |
+      SE: {{ sistema.qSE }} |
+      SG: {{ sistema.qSG }}
+
+      <br>
+
+      <small>
+        Próxima lógica:
+        {{ sistema.proximaEPrioridade ? "SP (Prioritária)" : "SE/SG (Normal)" }}
+  </small>
+</div>
+
+      <div class="control-panel">
+        <button class="action-btn" (click)="sistema.chamarProximo()">
+          🔔 Chamar Próximo
+        </button>
+
+        <button class="action-btn finish" (click)="sistema.finalizarAtendimento(false)">
+          ✅ Finalizar Atendimento
+        </button>
+
+        <button 
+          class="action-btn finish" 
+          style="background-color:#d32f2f" 
+          (click)="sistema.finalizarAtendimento(true)"
+        >
+          ❌ Cliente Ausente (5%)
+        </button>
+      </div>
+
+      <p style="color: blue; margin-top: 10px;">
+        {{ sistema.statusMensagem }}
+      </p>
+    </div>
+  </div>
+
+  <div class="caixa_3">
+    <div class="card">
+      <h2>Retire sua Senha</h2>
+
+      <div class="totem-buttons" id="totem">
+        <button class="btn-totem btn-sp" (click)="sistema.emitirSenha('SP')">
+          SP - Prioritária
+        </button>
+
+        <button class="btn-totem btn-se" (click)="sistema.emitirSenha('SE')">
+          SE - Exames
+        </button>
+
+        <button class="btn-totem btn-sg" (click)="sistema.emitirSenha('SG')">
+          SG - Geral
+        </button>
+      </div>
+
+      <p style="font-size: 0.8em; text-align: center; color: #666; margin-top: 10px;">
+        Horário de funcionamento: 07:00 às 17:00
+      </p>
+    </div>
+  </div>
+
+  <div class="caixa_4">
+    <div class="card" id="report_caixa">
+      <h2>Relatório Diário</h2>
+
+      <div class="reports-container" >
+        <table class="report-table">
+  <thead>
+    <tr>
+      <th class="th">ID</th>
+      <th class="th">Data</th>
+      <th class="th">Hora Emissão</th>
+      <th class="th">Hora Conclusão</th>
+      <th class="th">Unidade</th>
+      <th class="th">Tempo Médio</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let t of sistema.relatorio">
+
+      <!-- Always show ID -->
+      <td>{{ t.numero }}</td>
+
+      <!-- If discarded: blank cells -->
+      <ng-container *ngIf="t.status !== 'Ausente/Descartada'; else descartado">
+
+        <!-- Date (dd/mm/yyyy) -->
+        <td>{{ t.emissao | date:'dd/MM/yyyy' }}</td>
+
+        <!-- Emission time -->
+        <td>{{ t.emissao | date:'HH:mm:ss' }}</td>
+
+        <!-- Completion time (or '-') -->
+        <td>
+          {{ t.fimAtendimento ? (t.fimAtendimento | date:'HH:mm:ss') : '-' }}
+        </td>
+
+        <!-- Unit name only for completed tickets -->
+        <td>
+          {{ t.status === 'Atendido' ? 'Guicê 1' : '-' }}
+        </td>
+          
+
+        <td >
+              {{ sistema.getTempoEstimado(t) }}
+
+
+        </td>
+      </ng-container>
+
+      <!-- Template for discarded tickets -->
+      <ng-template #descartado>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </ng-template>
+
+    </tr>
+  </tbody>
+</table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="caixa_esta">
+    <div class="estatisticas">
+  <h3>Estatísticas</h3>
+
+  <p>Total emitidos: {{ sistema.getEstatisticas().totalEmitidos }}</p>
+  <p>Total concluídos: {{ sistema.getEstatisticas().totalConcluidos }}</p>
+  <p>Total SP emitidos: {{ sistema.getEstatisticas().totalSP }}</p>
+  <p>Total SP concluídos: {{ sistema.getEstatisticas().totalSPConcluidos }}</p>
+</div>
+
+</div>
+
+
+
+<router-outlet />
